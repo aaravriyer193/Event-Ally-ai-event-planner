@@ -1,9 +1,12 @@
 import React from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useEvents } from '../contexts/EventContext';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import Button from '../components/Button';
+import AIAssistant from '../components/AIAssistant';
+import APISetupGuide from '../components/APISetupGuide';
 import { 
   Plus, 
   Calendar, 
@@ -12,12 +15,18 @@ import {
   Users,
   Clock,
   Sparkles,
-  MoreVertical
+  MoreVertical,
+  Settings as SettingsIcon
 } from 'lucide-react';
 
 export default function Dashboard() {
   const { events } = useEvents();
   const { user } = useAuth();
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [showAPIGuide, setShowAPIGuide] = useState(false);
+
+  const hasAPIKeys = import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -50,6 +59,24 @@ export default function Dashboard() {
               : `You have ${events.length} event${events.length !== 1 ? 's' : ''} in progress`
             }
           </p>
+          
+          {/* API Setup Notice */}
+          {!hasAPIKeys && (
+            <div className="mt-4 bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <SettingsIcon className="h-5 w-5 text-orange-400" />
+                  <div>
+                    <p className="text-orange-400 font-medium">Setup Required</p>
+                    <p className="text-gray-300 text-sm">Configure API keys to unlock AI features and real venue data</p>
+                  </div>
+                </div>
+                <Button variant="secondary" size="sm" onClick={() => setShowAPIGuide(true)}>
+                  Setup APIs
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Quick Actions */}
@@ -154,7 +181,14 @@ export default function Dashboard() {
                           AI Plan Ready
                         </div>
                       )}
-                      <button className="p-2 text-gray-400 hover:text-white transition-colors">
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setSelectedEvent(event);
+                          setShowAIAssistant(true);
+                        }}
+                        className="p-2 text-gray-400 hover:text-white transition-colors"
+                      >
                         <MoreVertical className="h-4 w-4" />
                       </button>
                     </div>
@@ -189,6 +223,22 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* AI Assistant */}
+      {selectedEvent && (
+        <AIAssistant
+          eventId={selectedEvent.id}
+          eventDetails={selectedEvent}
+          isOpen={showAIAssistant}
+          onToggle={() => setShowAIAssistant(!showAIAssistant)}
+        />
+      )}
+
+      {/* API Setup Guide */}
+      <APISetupGuide 
+        isOpen={showAPIGuide}
+        onClose={() => setShowAPIGuide(false)}
+      />
     </Layout>
   );
 }

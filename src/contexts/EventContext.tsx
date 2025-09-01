@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
+import { EventAIAssistant, AIEventPlan } from '../services/aiService';
+import { PlacesService } from '../services/placesService';
 
 export interface Event {
   id: string;
@@ -17,6 +19,15 @@ export interface Event {
     decor: Vendor[];
     timeline: TimelineItem[];
     checklist: ChecklistItem[];
+    recommendations?: string;
+    budgetBreakdown?: {
+      venue: number;
+      catering: number;
+      entertainment: number;
+      decor: number;
+      photography: number;
+      miscellaneous: number;
+    };
   };
   createdAt: string;
 }
@@ -95,72 +106,208 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   };
 
   const generateAIPlan = async (event: Event): Promise<Event> => {
-    // Simulate AI processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Initialize AI assistant for this event
+      const aiAssistant = new EventAIAssistant(event.id, event);
+      
+      // Generate comprehensive AI plan
+      const aiPlanData: AIEventPlan = await aiAssistant.generateEventPlan();
+      
+      // Fetch real venue data based on AI recommendations
+      const venueResults = await PlacesService.searchVenues(event.location, event.type, event.budget);
+      
+      // Fetch real vendor data for different categories
+      const [cateringResults, entertainmentResults, photographyResults] = await Promise.all([
+        PlacesService.searchVendors('catering', event.location),
+        PlacesService.searchVendors('entertainment', event.location),
+        PlacesService.searchVendors('photography', event.location)
+      ]);
 
-    const mockVenues: Vendor[] = [
-      {
-        id: '1',
-        name: 'Grand Ballroom',
-        category: 'venue',
-        price: event.budget * 0.3,
-        rating: 4.8,
-        image: 'https://images.pexels.com/photos/169198/pexels-photo-169198.jpeg',
-        description: 'Elegant ballroom perfect for formal events',
-        contact: { phone: '(555) 123-4567', email: 'info@grandballroom.com', website: 'grandballroom.com' }
-      },
-      {
-        id: '2',
-        name: 'Garden Pavilion',
-        category: 'venue',
-        price: event.budget * 0.25,
-        rating: 4.6,
-        image: 'https://images.pexels.com/photos/1190298/pexels-photo-1190298.jpeg',
-        description: 'Beautiful outdoor venue with garden views',
-        contact: { phone: '(555) 234-5678', email: 'hello@gardenpavilion.com', website: 'gardenpavilion.com' }
+      // Convert real data to our vendor format with AI recommendations
+      const venues: Vendor[] = venueResults.slice(0, 3).map((place, index) => {
+        const aiVenue = aiPlanData.venues[index];
+        return {
+          id: place.id,
+          name: place.name,
+          category: 'venue',
+          price: calculateVenuePrice(event.budget, place.priceLevel, aiVenue?.priceRange),
+          rating: place.rating,
+          image: place.photos[0],
+          description: aiVenue?.description || `${place.types.filter(t => !['establishment', 'point_of_interest'].includes(t)).join(', ')} located at ${place.address}`,
+          contact: {
+            phone: place.phone || '(555) 000-0000',
+            email: generateEmail(place.name),
+            website: place.website || generateWebsite(place.name)
+          }
+        };
+      });
+
+      const catering: Vendor[] = cateringResults.slice(0, 3).map((place, index) => {
+        const aiCatering = aiPlanData.catering[index];
+        return {
+          id: place.id,
+          name: place.name,
+          category: 'catering',
+          price: aiCatering?.pricePerPerson || Math.round((event.budget * 0.4) / event.guests),
+          rating: place.rating,
+          image: place.photos[0],
+          description: aiCatering?.description || `${aiCatering?.cuisine || 'Full service'} catering with ${aiCatering?.serviceStyle || 'professional'} service style`,
+          contact: {
+            phone: place.phone || '(555) 000-0000',
+            email: generateEmail(place.name, 'orders'),
+            website: place.website || generateWebsite(place.name)
+          }
+        };
+      });
+
+      const entertainment: Vendor[] = entertainmentResults.slice(0, 2).map((place, index) => {
+        const aiEntertainment = aiPlanData.entertainment[index];
+        return {
+          id: place.id,
+          name: place.name,
+          category: 'entertainment',
+          price: aiEntertainment?.estimatedCost || Math.round(event.budget * 0.15),
+          rating: place.rating,
+          image: place.photos[0],
+          description: aiEntertainment?.description || `Professional ${aiEntertainment?.type || 'entertainment'} services`,
+          contact: {
+            phone: place.phone || '(555) 000-0000',
+            email: generateEmail(place.name, 'book'),
+            website: place.website || generateWebsite(place.name)
+          }
+        };
+      });
+
+      // Convert AI timeline and checklist to our format
+      const timeline: TimelineItem[] = aiPlanData.timeline.map((item: any, index: number) => ({
+        id: (index + 1).toString(),
+        time: item.time,
+        activity: item.activity,
+        duration: item.duration || 60
+      }));
+
+      const checklist: ChecklistItem[] = aiPlanData.checklist.map((item: any, index: number) => ({
+        id: (index + 1).toString(),
+        task: item.task,
+        deadline: item.deadline || calculateDeadline(event.date, index),
+        completed: false,
+        assignee: undefined
+      }));
+
+      const aiPlan = {
+        venues,
+        catering,
+        entertainment,
+        decor: aiPlanData.decor || [],
+        timeline,
+        checklist,
+        recommendations: aiPlanData.recommendations,
+        budgetBreakdown: aiPlanData.budgetBreakdown
+      };
+
+      const updatedEvent = { ...event, aiPlan, status: 'planned' as const };
+      updateEvent(event.id, { aiPlan, status: 'planned' });
+      
+      return updatedEvent;
+    } catch (error) {
+      console.error('Error generating AI plan:', error);
+      
+      // Create a basic fallback plan
+      const fallbackPlan = await createFallbackPlan(event);
+      const updatedEvent = { ...event, aiPlan: fallbackPlan, status: 'planned' as const };
+      updateEvent(event.id, { aiPlan: fallbackPlan, status: 'planned' });
+      
+      return updatedEvent;
+    }
+  };
+
+  const createFallbackPlan = async (event: Event) => {
+    // Try to get real venue data even if AI fails
+    const venueResults = await PlacesService.searchVenues(event.location, event.type, event.budget);
+    const cateringResults = await PlacesService.searchVendors('catering', event.location);
+    
+    const venues: Vendor[] = venueResults.slice(0, 2).map(place => ({
+      id: place.id,
+      name: place.name,
+      category: 'venue',
+      price: Math.round(event.budget * 0.3),
+      rating: place.rating,
+      image: place.photos[0],
+      description: `Professional event venue - ${place.address}`,
+      contact: {
+        phone: place.phone || '(555) 123-4567',
+        email: generateEmail(place.name),
+        website: place.website || generateWebsite(place.name)
       }
-    ];
+    }));
 
-    const mockCatering: Vendor[] = [
-      {
-        id: '3',
-        name: 'Gourmet Delights',
-        category: 'catering',
-        price: event.budget * 0.4,
-        rating: 4.9,
-        image: 'https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg',
-        description: 'Premium catering with international cuisine',
-        contact: { phone: '(555) 345-6789', email: 'orders@gourmetdelights.com', website: 'gourmetdelights.com' }
+    const catering: Vendor[] = cateringResults.slice(0, 2).map(place => ({
+      id: place.id,
+      name: place.name,
+      category: 'catering',
+      price: Math.round((event.budget * 0.4) / event.guests),
+      rating: place.rating,
+      image: place.photos[0],
+      description: 'Full-service catering with professional staff',
+      contact: {
+        phone: place.phone || '(555) 234-5678',
+        email: generateEmail(place.name, 'orders'),
+        website: place.website || generateWebsite(place.name)
       }
-    ];
+    }));
 
-    const mockTimeline: TimelineItem[] = [
-      { id: '1', time: '17:00', activity: 'Guest arrival and cocktails', duration: 60 },
-      { id: '2', time: '18:00', activity: 'Ceremony begins', duration: 30 },
-      { id: '3', time: '18:30', activity: 'Reception and dinner', duration: 120 },
-      { id: '4', time: '20:30', activity: 'Entertainment and dancing', duration: 150 }
-    ];
-
-    const mockChecklist: ChecklistItem[] = [
-      { id: '1', task: 'Confirm venue booking', deadline: '2025-02-01', completed: false },
-      { id: '2', task: 'Finalize guest list', deadline: '2025-02-15', completed: false },
-      { id: '3', task: 'Send invitations', deadline: '2025-03-01', completed: false },
-      { id: '4', task: 'Confirm catering menu', deadline: '2025-03-15', completed: false }
-    ];
-
-    const aiPlan = {
-      venues: mockVenues,
-      catering: mockCatering,
+    return {
+      venues,
+      catering,
       entertainment: [],
       decor: [],
-      timeline: mockTimeline,
-      checklist: mockChecklist
+      timeline: [
+        { id: '1', time: '17:00', activity: 'Setup and preparation', duration: 60 },
+        { id: '2', time: '18:00', activity: 'Guest arrival and welcome', duration: 30 },
+        { id: '3', time: '18:30', activity: 'Main event activities', duration: 120 },
+        { id: '4', time: '20:30', activity: 'Closing and cleanup', duration: 60 }
+      ],
+      checklist: [
+        { id: '1', task: 'Confirm venue booking', deadline: calculateDeadline(event.date, 0), completed: false },
+        { id: '2', task: 'Finalize guest list', deadline: calculateDeadline(event.date, 1), completed: false },
+        { id: '3', task: 'Send invitations', deadline: calculateDeadline(event.date, 2), completed: false }
+      ],
+      recommendations: 'Basic event plan created. Consider adding more vendors and customizing your timeline.',
+      budgetBreakdown: {
+        venue: 30,
+        catering: 40,
+        entertainment: 15,
+        decor: 10,
+        photography: 5,
+        miscellaneous: 0
+      }
     };
+  };
 
-    const updatedEvent = { ...event, aiPlan, status: 'planned' as const };
-    updateEvent(event.id, { aiPlan, status: 'planned' });
-    
-    return updatedEvent;
+  const calculateVenuePrice = (budget: number, priceLevel: number, aiPriceRange?: string): number => {
+    if (aiPriceRange) {
+      const match = aiPriceRange.match(/\$?([\d,]+)/);
+      if (match) {
+        return parseInt(match[1].replace(/,/g, ''));
+      }
+    }
+    return Math.round(budget * (0.25 + priceLevel * 0.05));
+  };
+
+  const generateEmail = (name: string, prefix: string = 'info'): string => {
+    const domain = name.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 15);
+    return `${prefix}@${domain}.com`;
+  };
+
+  const generateWebsite = (name: string): string => {
+    const domain = name.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 15);
+    return `https://${domain}.com`;
+  };
+
+  const calculateDeadline = (eventDate: string, weeksBeforeEvent: number): string => {
+    const date = new Date(eventDate);
+    date.setDate(date.getDate() - (weeksBeforeEvent + 1) * 7);
+    return date.toISOString().split('T')[0];
   };
 
   return (

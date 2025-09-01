@@ -28,6 +28,9 @@ Visit the live application: [https://event-ally-ai-event-yq09.bolt.host](https:/
 - **Styling**: Tailwind CSS with custom design system
 - **Routing**: React Router DOM
 - **Icons**: Lucide React
+- **AI Integration**: OpenAI GPT-4 for intelligent planning
+- **Location Services**: Google Places API for real venue data
+- **HTTP Client**: Axios for API requests
 - **Build Tool**: Vite
 - **Deployment**: Bolt Hosting
 
@@ -49,7 +52,29 @@ npm install
 npm run dev
 ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+4. Configure API keys (optional but recommended):
+   - Copy `.env.example` to `.env`
+   - Add your OpenAI API key for AI features
+   - Add your Google Places API key for real venue data
+
+5. Open your browser and navigate to `http://localhost:5173`
+
+## 🔑 API Configuration
+
+To unlock the full potential of Event Ally, configure these APIs:
+
+### OpenAI API (Required for AI Features)
+1. Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+2. Create a new API key
+3. Add to your `.env` file: `VITE_OPENAI_API_KEY=your_key_here`
+
+### Google Places API (Required for Real Venue Data)
+1. Visit [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Enable the Places API
+3. Create an API key
+4. Add to your `.env` file: `VITE_GOOGLE_PLACES_API_KEY=your_key_here`
+
+**Note**: The app will work with sample data if APIs aren't configured, but you'll miss out on the intelligent planning and real venue recommendations.
 
 ## 🏗️ Project Structure
 

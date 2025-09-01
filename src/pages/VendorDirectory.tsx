@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PlacesService, PlaceResult } from '../services/placesService';
 import Layout from '../components/Layout';
 import Button from '../components/Button';
 import { 
@@ -11,7 +12,8 @@ import {
   Mail,
   Globe,
   Plus,
-  Heart
+  Heart,
+  Loader
 } from 'lucide-react';
 
 const categories = [
@@ -112,6 +114,66 @@ export default function VendorDirectory() {
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [vendorList, setVendorList] = useState<any[]>(vendors);
+  const [loading, setLoading] = useState(false);
+  const [location, setLocation] = useState('New York, NY');
+
+  const searchVendors = async () => {
+    if (!location.trim()) return;
+    
+    setLoading(true);
+    try {
+      let results: PlaceResult[] = [];
+      
+      if (selectedCategory === 'All Categories') {
+        // Search multiple categories
+        const categories = ['catering', 'photography', 'entertainment'];
+        const promises = categories.map(cat => PlacesService.searchVendors(cat, location));
+        const allResults = await Promise.all(promises);
+        results = allResults.flat();
+      } else {
+        const categoryMap: { [key: string]: string } = {
+          'Venues': 'venue',
+          'Catering': 'catering',
+          'Photography': 'photography',
+          'Entertainment': 'entertainment',
+          'Decor': 'decor',
+          'Transportation': 'transportation',
+          'Flowers': 'flowers',
+          'Music & DJ': 'music'
+        };
+        
+        const searchCategory = categoryMap[selectedCategory] || 'catering';
+        results = await PlacesService.searchVendors(searchCategory, location);
+      }
+      
+      // Convert to vendor format
+      const formattedVendors = results.map(place => ({
+        id: place.id,
+        name: place.name,
+        category: selectedCategory === 'All Categories' ? 'Mixed' : selectedCategory,
+        price: place.priceLevel * 1000, // Estimate based on price level
+        rating: place.rating,
+        reviews: place.reviews,
+        location: place.address,
+        image: place.photos[0] || 'https://images.pexels.com/photos/169198/pexels-photo-169198.jpeg',
+        description: place.types.join(', '),
+        contact: {
+          phone: place.phone || '(555) 000-0000',
+          email: `info@${place.name.toLowerCase().replace(/\s+/g, '')}.com`,
+          website: place.website || `${place.name.toLowerCase().replace(/\s+/g, '')}.com`
+        },
+        features: place.types.slice(0, 4)
+      }));
+      
+      setVendorList(formattedVendors);
+    } catch (error) {
+      console.error('Error searching vendors:', error);
+      // Keep existing mock data as fallback
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleFavorite = (vendorId: string) => {
     setFavorites(prev => 
@@ -121,7 +183,7 @@ export default function VendorDirectory() {
     );
   };
 
-  const filteredVendors = vendors.filter(vendor => {
+  const filteredVendors = vendorList.filter(vendor => {
     const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          vendor.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All Categories' || vendor.category === selectedCategory;
@@ -142,8 +204,19 @@ export default function VendorDirectory() {
         {/* Search and Filters */}
         <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 mb-8">
           <div className="grid lg:grid-cols-4 gap-4">
+            {/* Location */}
+            <div>
+              <input
+                type="text"
+                placeholder="Enter location..."
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all duration-200"
+              />
+            </div>
+
             {/* Search */}
-            <div className="lg:col-span-2">
+            <div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
@@ -171,8 +244,14 @@ export default function VendorDirectory() {
 
             {/* Filter Button */}
             <div>
-              <Button variant="secondary" icon={Filter} className="w-full">
-                More Filters
+              <Button 
+                variant="secondary" 
+                icon={loading ? Loader : Search} 
+                className="w-full"
+                onClick={searchVendors}
+                disabled={loading}
+              >
+                {loading ? 'Searching...' : 'Search'}
               </Button>
             </div>
           </div>
@@ -199,6 +278,7 @@ export default function VendorDirectory() {
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-white">
               {filteredVendors.length} vendor{filteredVendors.length !== 1 ? 's' : ''} found
+              {loading && <span className="text-gray-400 ml-2">(searching...)</span>}
             </h2>
             <div className="flex items-center space-x-2 text-sm text-gray-400">
               <span>Sort by:</span>

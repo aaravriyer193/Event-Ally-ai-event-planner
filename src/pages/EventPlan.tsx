@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEvents } from '../contexts/EventContext';
 import Layout from '../components/Layout';
 import Button from '../components/Button';
+import AIAssistant from '../components/AIAssistant';
 import { 
   ArrowLeft,
   Calendar,
@@ -27,6 +28,7 @@ export default function EventPlan() {
   const { events, updateEvent, setCurrentEvent } = useEvents();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
   
   const event = events.find(e => e.id === id);
 
@@ -110,6 +112,9 @@ export default function EventPlan() {
           <div className="flex items-center space-x-3">
             <Button variant="secondary" icon={Share2}>Share</Button>
             <Button variant="secondary" icon={Download}>Export PDF</Button>
+            <Button variant="secondary" onClick={() => setShowAIAssistant(true)}>
+              AI Assistant
+            </Button>
             <Button icon={Edit}>Edit Event</Button>
           </div>
         </div>
@@ -424,6 +429,16 @@ export default function EventPlan() {
           )}
         </div>
       </div>
+
+      {/* AI Assistant */}
+      {event && (
+        <AIAssistant
+          eventId={event.id}
+          eventDetails={event}
+          isOpen={showAIAssistant}
+          onToggle={() => setShowAIAssistant(!showAIAssistant)}
+        />
+      )}
     </Layout>
   );
 }

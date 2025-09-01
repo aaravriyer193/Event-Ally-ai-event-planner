@@ -1,0 +1,64 @@
+GitHub Repository Setup Instructions for Event Ally
+========================================================
+
+Follow these steps to create a GitHub repository for your Event Ally project:
+
+1. CREATE GITHUB REPOSITORY
+   - Go to https://github.com/new
+   - Repository name: event-ally
+   - Description: AI-Powered Event Planning Platform
+   - Set to Public (recommended for open source)
+   - DO NOT initialize with README, .gitignore, or license (we already have these)
+   - Click "Create repository"
+
+2. COPY THE REPOSITORY URL
+   - Copy the HTTPS URL (e.g., https://github.com/yourusername/event-ally.git)
+
+3. INITIALIZE LOCAL GIT REPOSITORY
+   Open your terminal in the project directory and run:
+
+   git init
+   git add .
+   git commit -m "Initial commit: Complete Event Ally AI event planning platform"
+
+4. CONNECT TO GITHUB
+   Replace YOUR_USERNAME with your actual GitHub username:
+
+   git branch -M main
+   git remote add origin https://github.com/YOUR_USERNAME/event-ally.git
+   git push -u origin main
+
+5. CONFIGURE REPOSITORY SETTINGS
+   - Go to your repository on GitHub
+   - Click "Settings" tab
+   - Under "General" → "Features":
+     ✓ Enable Issues
+     ✓ Enable Projects
+     ✓ Enable Wiki (optional)
+   - Under "Pages":
+     - Source: Deploy from a branch
+     - Branch: main / (root)
+     - This will auto-deploy your site to GitHub Pages
+
+6. ADD REPOSITORY TOPICS
+   - Click the gear icon next to "About"
+   - Add topics: ai, event-planning, react, typescript, tailwindcss, openai, web-app
+   - Add website URL: https://event-ally-ai-event-yq09.bolt.host
+
+7. PROTECT MAIN BRANCH (RECOMMENDED)
+   - Go to Settings → Branches
+   - Add rule for main branch
+   - Enable "Require pull request reviews before merging"
+
+8. ADD COLLABORATORS (IF NEEDED)
+   - Go to Settings → Collaborators
+   - Click "Add people"
+   - Enter GitHub usernames or email addresses
+
+IMPORTANT NOTES:
+- The .env file is ignored by Git for security
+- Users will need to configure their own API keys
+- The README includes comprehensive setup instructions
+- All sensitive information is properly excluded from version control
+
+Your Event Ally repository will be ready for collaboration and contributions!
