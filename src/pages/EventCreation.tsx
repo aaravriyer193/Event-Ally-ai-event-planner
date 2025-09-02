@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvents } from '../contexts/EventContext';
 import Layout from '../components/Layout';
-import Button from '../components/Button';
+import AnimatedButton from '../components/AnimatedButton';
+import AnimatedCard from '../components/AnimatedCard';
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -107,6 +108,7 @@ export default function EventCreation() {
         </div>
 
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-8">
+        <AnimatedCard animation="scaleIn" delay={200}>
           {/* Step 1: Event Basics */}
           {currentStep === 1 && (
             <div className="space-y-6">
@@ -335,31 +337,35 @@ export default function EventCreation() {
                 size="lg"
                 className="px-8 py-4"
                 icon={generating ? Loader : Sparkles}
+                animation="glow"
               >
                 {generating ? 'Generating AI Plan...' : 'Generate AI Event Plan'}
-              </Button>
+              </AnimatedButton>
             </div>
           )}
+        </AnimatedCard>
 
           {/* Navigation */}
           <div className="flex justify-between mt-8">
-            <Button
+            <AnimatedButton
               variant="ghost"
               onClick={handleBack}
               disabled={currentStep === 1}
               icon={ArrowLeft}
+              animation="bounce"
             >
               Back
-            </Button>
+            </AnimatedButton>
 
             {currentStep < totalSteps ? (
-              <Button
+              <AnimatedButton
                 onClick={handleNext}
                 disabled={!canProceed()}
                 icon={ArrowRight}
+                animation="pulse"
               >
                 Next
-              </Button>
+              </AnimatedButton>
             ) : null}
           </div>
         </div>

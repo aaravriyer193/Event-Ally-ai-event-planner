@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { EventAIAssistant } from '../services/aiService';
-import { PlacesService } from '../services/placesService';
+import { OpenStreetMapService } from '../services/mapService';
 import Button from './Button';
+import anime from 'animejs/lib/anime.es.js';
 import { 
   MessageCircle, 
   Send, 
@@ -48,6 +49,7 @@ export default function AIAssistant({ eventId, eventDetails, isOpen, onToggle }:
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const aiAssistant = useRef(new EventAIAssistant(eventId, eventDetails));
+  const chatRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -57,12 +59,24 @@ export default function AIAssistant({ eventId, eventDetails, isOpen, onToggle }:
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (isOpen && chatRef.current) {
+      anime({
+        targets: chatRef.current,
+        opacity: [0, 1],
+        scale: [0.9, 1],
+        duration: 300,
+        easing: 'easeOutCubic'
+      });
+    }
+  }, [isOpen]);
+
   const searchNearbyVendors = async (category: string) => {
     setLoadingSuggestions(true);
     try {
-      const results = await PlacesService.searchVendors(category, eventDetails.location);
+      const results = await OpenStreetMapService.searchVendors(category, eventDetails.location);
       const vendorNames = results.slice(0, 3).map(place => 
-        `${place.name} - ${place.rating}⭐ (${place.address})`
+        `${place.name} - ${place.rating.toFixed(1)}⭐ (${place.address})`
       );
       
       const message = `Found ${category} options near ${eventDetails.location}:\n\n${vendorNames.join('\n\n')}`;
@@ -267,7 +281,7 @@ export default function AIAssistant({ eventId, eventDetails, isOpen, onToggle }:
   }
 
   return (
-    <div className={`fixed bottom-6 right-6 bg-gray-800/95 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-2xl z-50 transition-all duration-300 ${
+    <div ref={chatRef} className={`fixed bottom-6 right-6 bg-gray-800/95 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-2xl z-50 transition-all duration-300 ${
       isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]'
     }`}>
       {/* Header */}
@@ -306,14 +320,11 @@ export default function AIAssistant({ eventId, eventDetails, isOpen, onToggle }:
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                 <span className="text-green-400 text-xs font-medium">
-                  {import.meta.env.VITE_OPENAI_API_KEY ? 'AI Assistant Active' : 'AI Assistant Offline - Configure API Key'}
+                  AI Assistant Active
                 </span>
               </div>
               <p className="text-gray-400 text-xs mt-1">
-                {import.meta.env.VITE_GOOGLE_PLACES_API_KEY 
-                  ? 'Real-time venue data available' 
-                  : 'Using sample data - Configure Google Places API for real venues'
-                }
+                Using OpenStreetMap for real venue data
               </p>
             </div>
 

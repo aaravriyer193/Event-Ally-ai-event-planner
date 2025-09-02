@@ -1,5 +1,9 @@
 import React from 'react';
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import anime from 'animejs/lib/anime.es.js';
+import AnimatedCard from '../components/AnimatedCard';
+import AnimatedButton from '../components/AnimatedButton';
 import { 
   Sparkles, 
   Calendar, 
@@ -9,9 +13,34 @@ import {
   CheckCircle,
   ArrowRight
 } from 'lucide-react';
-import Button from '../components/Button';
 
 export default function LandingPage() {
+  const heroRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    // Hero section animations
+    if (titleRef.current) {
+      anime({
+        targets: titleRef.current,
+        opacity: [0, 1],
+        translateY: [50, 0],
+        duration: 1000,
+        easing: 'easeOutCubic'
+      });
+    }
+
+    // Floating animation for sparkles
+    anime({
+      targets: '.floating-sparkle',
+      translateY: [-10, 10],
+      duration: 2000,
+      direction: 'alternate',
+      loop: true,
+      easing: 'easeInOutSine'
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-900">
       {/* Header */}
@@ -31,7 +60,7 @@ export default function LandingPage() {
                 Sign In
               </Link>
               <Link to="/signup">
-                <Button size="sm">Get Started</Button>
+                <AnimatedButton size="sm" animation="glow">Get Started</AnimatedButton>
               </Link>
             </div>
           </div>
@@ -39,10 +68,19 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 lg:py-32">
+      <section ref={heroRef} className="relative overflow-hidden py-20 lg:py-32">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-yellow-500/10"></div>
+        <div className="absolute top-20 left-20 floating-sparkle">
+          <Sparkles className="h-6 w-6 text-orange-400/30" />
+        </div>
+        <div className="absolute top-40 right-32 floating-sparkle">
+          <Sparkles className="h-4 w-4 text-yellow-400/40" />
+        </div>
+        <div className="absolute bottom-32 left-1/4 floating-sparkle">
+          <Sparkles className="h-5 w-5 text-orange-300/20" />
+        </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+          <h1 ref={titleRef} className="text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight">
             Plan your event in{' '}
             <span className="bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
               minutes
@@ -55,14 +93,14 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link to="/signup">
-              <Button size="lg" className="px-8 py-4 text-lg">
+              <AnimatedButton size="lg" className="px-8 py-4 text-lg" animation="glow">
                 Start Planning Now
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              </AnimatedButton>
             </Link>
-            <Button variant="ghost" size="lg" className="px-8 py-4 text-lg">
+            <AnimatedButton variant="ghost" size="lg" className="px-8 py-4 text-lg" animation="pulse">
               Watch Demo
-            </Button>
+            </AnimatedButton>
           </div>
         </div>
       </section>
@@ -76,29 +114,29 @@ export default function LandingPage() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center group">
+            <AnimatedCard className="text-center group" delay={0} animation="fadeInUp">
               <div className="bg-gradient-to-br from-orange-500/20 to-yellow-500/20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 group-hover:shadow-lg group-hover:shadow-orange-500/30 transition-all duration-300">
                 <Calendar className="h-8 w-8 text-orange-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">1. Enter Your Details</h3>
               <p className="text-gray-400">Tell us about your event type, budget, guest count, and style preferences</p>
-            </div>
+            </AnimatedCard>
             
-            <div className="text-center group">
+            <AnimatedCard className="text-center group" delay={200} animation="fadeInUp">
               <div className="bg-gradient-to-br from-orange-500/20 to-yellow-500/20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 group-hover:shadow-lg group-hover:shadow-orange-500/30 transition-all duration-300">
                 <Sparkles className="h-8 w-8 text-orange-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">2. AI Creates Your Plan</h3>
               <p className="text-gray-400">Our AI analyzes your needs and generates a comprehensive event plan with vendor recommendations</p>
-            </div>
+            </AnimatedCard>
             
-            <div className="text-center group">
+            <AnimatedCard className="text-center group" delay={400} animation="fadeInUp">
               <div className="bg-gradient-to-br from-orange-500/20 to-yellow-500/20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 group-hover:shadow-lg group-hover:shadow-orange-500/30 transition-all duration-300">
                 <Users className="h-8 w-8 text-orange-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">3. Connect & Execute</h3>
               <p className="text-gray-400">Review, customize, and connect directly with recommended vendors to bring your event to life</p>
-            </div>
+            </AnimatedCard>
           </div>
         </div>
       </section>
@@ -134,11 +172,16 @@ export default function LandingPage() {
                 description: 'Detailed schedules for seamless event execution'
               }
             ].map((feature, index) => (
-              <div key={index} className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6 hover:border-orange-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10">
+              <AnimatedCard 
+                key={index} 
+                className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6 hover:border-orange-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10"
+                delay={index * 150}
+                animation="scaleIn"
+              >
                 <feature.icon className="h-10 w-10 text-orange-400 mb-4" />
                 <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
                 <p className="text-gray-400">{feature.description}</p>
-              </div>
+              </AnimatedCard>
             ))}
           </div>
         </div>
@@ -169,7 +212,12 @@ export default function LandingPage() {
                 quote: 'Planned my daughter\'s sweet 16 in under an hour. Amazing experience!'
               }
             ].map((testimonial, index) => (
-              <div key={index} className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6">
+              <AnimatedCard 
+                key={index} 
+                className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6"
+                delay={index * 200}
+                animation="fadeInLeft"
+              >
                 <div className="flex items-center mb-4">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
@@ -180,7 +228,7 @@ export default function LandingPage() {
                   <p className="text-white font-semibold">{testimonial.name}</p>
                   <p className="text-gray-400 text-sm">{testimonial.role}</p>
                 </div>
-              </div>
+              </AnimatedCard>
             ))}
           </div>
         </div>
@@ -192,10 +240,10 @@ export default function LandingPage() {
           <h2 className="text-4xl font-bold text-white mb-6">Ready to Plan Your Perfect Event?</h2>
           <p className="text-xl text-gray-300 mb-8">Join thousands of satisfied event planners</p>
           <Link to="/signup">
-            <Button size="lg" className="px-8 py-4 text-lg">
+            <AnimatedButton size="lg" className="px-8 py-4 text-lg" animation="glow">
               Get Started Free
               <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            </AnimatedButton>
           </Link>
         </div>
       </section>

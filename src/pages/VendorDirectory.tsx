@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { PlacesService, PlaceResult } from '../services/placesService';
+import { OpenStreetMapService } from '../services/mapService';
+import AnimatedCard from '../components/AnimatedCard';
+import AnimatedButton from '../components/AnimatedButton';
 import Layout from '../components/Layout';
-import Button from '../components/Button';
+import MapView from '../components/MapView';
 import { 
   Search,
   Filter,
@@ -123,12 +125,12 @@ export default function VendorDirectory() {
     
     setLoading(true);
     try {
-      let results: PlaceResult[] = [];
+      let results: any[] = [];
       
       if (selectedCategory === 'All Categories') {
         // Search multiple categories
         const categories = ['catering', 'photography', 'entertainment'];
-        const promises = categories.map(cat => PlacesService.searchVendors(cat, location));
+        const promises = categories.map(cat => OpenStreetMapService.searchVendors(cat, location));
         const allResults = await Promise.all(promises);
         results = allResults.flat();
       } else {
@@ -144,7 +146,7 @@ export default function VendorDirectory() {
         };
         
         const searchCategory = categoryMap[selectedCategory] || 'catering';
-        results = await PlacesService.searchVendors(searchCategory, location);
+        results = await OpenStreetMapService.searchVendors(searchCategory, location);
       }
       
       // Convert to vendor format
@@ -244,15 +246,17 @@ export default function VendorDirectory() {
 
             {/* Filter Button */}
             <div>
-              <Button 
+              <AnimatedButton 
                 variant="secondary" 
                 icon={loading ? Loader : Search} 
                 className="w-full"
                 onClick={searchVendors}
                 disabled={loading}
+                disabled={loading}
+                animation="pulse"
               >
                 {loading ? 'Searching...' : 'Search'}
-              </Button>
+              </AnimatedButton>
             </div>
           </div>
 
@@ -292,10 +296,34 @@ export default function VendorDirectory() {
           </div>
         </div>
 
+        {/* Map View */}
+        {filteredVendors.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-white mb-4">Vendor Locations</h2>
+            <MapView
+              center={[40.7128, -74.0060]} // Default to NYC, should be dynamic based on search
+              markers={filteredVendors.slice(0, 10).map(vendor => ({
+                id: vendor.id,
+                position: [40.7128 + (Math.random() - 0.5) * 0.1, -74.0060 + (Math.random() - 0.5) * 0.1] as [number, number],
+                name: vendor.name,
+                address: vendor.location,
+                rating: vendor.rating,
+                price: vendor.price
+              }))}
+              className="h-96"
+            />
+          </div>
+        )}
+
         {/* Vendor Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredVendors.map((vendor) => (
-            <div key={vendor.id} className="bg-gray-800/50 border border-gray-700 rounded-xl overflow-hidden hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300 group">
+            <AnimatedCard 
+              key={vendor.id} 
+              className="bg-gray-800/50 border border-gray-700 rounded-xl overflow-hidden hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300 group"
+              delay={filteredVendors.indexOf(vendor) * 100}
+              animation="fadeInUp"
+            >
               {/* Image */}
               <div className="relative">
                 <img 
@@ -361,9 +389,9 @@ export default function VendorDirectory() {
 
                 {/* Actions */}
                 <div className="flex space-x-2">
-                  <Button size="sm" className="flex-1" icon={Plus}>
+                  <AnimatedButton size="sm" className="flex-1" icon={Plus} animation="bounce">
                     Add to Plan
-                  </Button>
+                  </AnimatedButton>
                   <button className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
                     <Phone className="h-4 w-4" />
                   </button>
@@ -375,7 +403,7 @@ export default function VendorDirectory() {
                   </button>
                 </div>
               </div>
-            </div>
+            </AnimatedCard>
           ))}
         </div>
 
@@ -384,7 +412,7 @@ export default function VendorDirectory() {
             <Search className="h-16 w-16 text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">No vendors found</h3>
             <p className="text-gray-400 mb-6">Try adjusting your search criteria or filters</p>
-            <Button variant="ghost">Clear Filters</Button>
+            <AnimatedButton variant="ghost" animation="shake">Clear Filters</AnimatedButton>
           </div>
         )}
       </div>

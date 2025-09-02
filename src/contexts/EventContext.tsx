@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { EventAIAssistant, AIEventPlan } from '../services/aiService';
-import { PlacesService } from '../services/placesService';
+import { OpenStreetMapService } from '../services/mapService';
 
 export interface Event {
   id: string;
@@ -114,13 +114,13 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
       const aiPlanData: AIEventPlan = await aiAssistant.generateEventPlan();
       
       // Fetch real venue data based on AI recommendations
-      const venueResults = await PlacesService.searchVenues(event.location, event.type, event.budget);
+      const venueResults = await OpenStreetMapService.searchVenues(event.location, event.type, event.budget);
       
       // Fetch real vendor data for different categories
       const [cateringResults, entertainmentResults, photographyResults] = await Promise.all([
-        PlacesService.searchVendors('catering', event.location),
-        PlacesService.searchVendors('entertainment', event.location),
-        PlacesService.searchVendors('photography', event.location)
+        OpenStreetMapService.searchVendors('catering', event.location),
+        OpenStreetMapService.searchVendors('entertainment', event.location),
+        OpenStreetMapService.searchVendors('photography', event.location)
       ]);
 
       // Convert real data to our vendor format with AI recommendations
@@ -223,8 +223,8 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
 
   const createFallbackPlan = async (event: Event) => {
     // Try to get real venue data even if AI fails
-    const venueResults = await PlacesService.searchVenues(event.location, event.type, event.budget);
-    const cateringResults = await PlacesService.searchVendors('catering', event.location);
+    const venueResults = await OpenStreetMapService.searchVenues(event.location, event.type, event.budget);
+    const cateringResults = await OpenStreetMapService.searchVendors('catering', event.location);
     
     const venues: Vendor[] = venueResults.slice(0, 2).map(place => ({
       id: place.id,

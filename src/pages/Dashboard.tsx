@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { useEvents } from '../contexts/EventContext';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
-import Button from '../components/Button';
+import AnimatedButton from '../components/AnimatedButton';
+import AnimatedCard from '../components/AnimatedCard';
 import AIAssistant from '../components/AIAssistant';
 import APISetupGuide from '../components/APISetupGuide';
 import { 
@@ -26,7 +27,7 @@ export default function Dashboard() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [showAPIGuide, setShowAPIGuide] = useState(false);
 
-  const hasAPIKeys = import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
+  const hasOpenAI = !!import.meta.env.VITE_OPENAI_API_KEY;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -61,19 +62,19 @@ export default function Dashboard() {
           </p>
           
           {/* API Setup Notice */}
-          {!hasAPIKeys && (
+          {!hasOpenAI && (
             <div className="mt-4 bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <SettingsIcon className="h-5 w-5 text-orange-400" />
                   <div>
                     <p className="text-orange-400 font-medium">Setup Required</p>
-                    <p className="text-gray-300 text-sm">Configure API keys to unlock AI features and real venue data</p>
+                    <p className="text-gray-300 text-sm">Configure OpenAI API key to unlock AI features</p>
                   </div>
                 </div>
-                <Button variant="secondary" size="sm" onClick={() => setShowAPIGuide(true)}>
-                  Setup APIs
-                </Button>
+                <AnimatedButton variant="secondary" size="sm" onClick={() => setShowAPIGuide(true)} animation="pulse">
+                  Setup API
+                </AnimatedButton>
               </div>
             </div>
           )}
@@ -82,39 +83,39 @@ export default function Dashboard() {
         {/* Quick Actions */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Link to="/create-event">
-            <div className="bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border border-orange-500/30 rounded-xl p-6 hover:shadow-lg hover:shadow-orange-500/20 transition-all duration-300 cursor-pointer group">
+            <AnimatedCard className="bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border border-orange-500/30 rounded-xl p-6 hover:shadow-lg hover:shadow-orange-500/20 transition-all duration-300 cursor-pointer group" delay={0}>
               <div className="flex items-center justify-between mb-4">
                 <Plus className="h-8 w-8 text-orange-400 group-hover:scale-110 transition-transform duration-200" />
                 <Sparkles className="h-5 w-5 text-yellow-400 opacity-60" />
               </div>
               <h3 className="text-white font-semibold mb-1">New Event</h3>
               <p className="text-gray-400 text-sm">Start planning with AI</p>
-            </div>
+            </AnimatedCard>
           </Link>
 
           <Link to="/vendors">
-            <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300 cursor-pointer group">
+            <AnimatedCard className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300 cursor-pointer group" delay={100}>
               <Users className="h-8 w-8 text-gray-400 group-hover:text-orange-400 mb-4 transition-colors duration-200" />
               <h3 className="text-white font-semibold mb-1">Browse Vendors</h3>
               <p className="text-gray-400 text-sm">Find perfect partners</p>
-            </div>
+            </AnimatedCard>
           </Link>
 
-          <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
+          <AnimatedCard className="bg-gray-800/50 border border-gray-700 rounded-xl p-6" delay={200}>
             <Calendar className="h-8 w-8 text-gray-400 mb-4" />
             <h3 className="text-white font-semibold mb-1">Upcoming</h3>
             <p className="text-gray-400 text-sm">
               {events.filter(e => new Date(e.date) > new Date()).length} events
             </p>
-          </div>
+          </AnimatedCard>
 
-          <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
+          <AnimatedCard className="bg-gray-800/50 border border-gray-700 rounded-xl p-6" delay={300}>
             <DollarSign className="h-8 w-8 text-gray-400 mb-4" />
             <h3 className="text-white font-semibold mb-1">Total Budget</h3>
             <p className="text-gray-400 text-sm">
               ${events.reduce((sum, e) => sum + e.budget, 0).toLocaleString()}
             </p>
-          </div>
+          </AnimatedCard>
         </div>
 
         {/* Events List */}
@@ -122,7 +123,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-white">Your Events</h2>
             <Link to="/create-event">
-              <Button icon={Plus}>Create Event</Button>
+              <AnimatedButton icon={Plus} animation="bounce">Create Event</AnimatedButton>
             </Link>
           </div>
 
@@ -132,18 +133,22 @@ export default function Dashboard() {
               <h3 className="text-xl font-semibold text-white mb-2">No Events Yet</h3>
               <p className="text-gray-400 mb-6">Create your first event and let AI do the heavy lifting</p>
               <Link to="/create-event">
-                <Button>Plan Your First Event</Button>
+                <AnimatedButton animation="glow">Plan Your First Event</AnimatedButton>
               </Link>
             </div>
           ) : (
             <div className="grid gap-4">
               {events.map((event) => (
-                <Link
+                <AnimatedCard
                   key={event.id}
-                  to={`/event/${event.id}`}
-                  className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300 group"
+                  delay={events.indexOf(event) * 100}
+                  animation="fadeInLeft"
                 >
-                  <div className="flex items-start justify-between">
+                  <Link
+                    to={`/event/${event.id}`}
+                    className="block bg-gray-800/50 border border-gray-700 rounded-xl p-6 hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300 group"
+                  >
+                    <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
                         <h3 className="text-xl font-semibold text-white group-hover:text-orange-400 transition-colors">
@@ -192,8 +197,9 @@ export default function Dashboard() {
                         <MoreVertical className="h-4 w-4" />
                       </button>
                     </div>
-                  </div>
-                </Link>
+                    </div>
+                  </Link>
+                </AnimatedCard>
               ))}
             </div>
           )}
