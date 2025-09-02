@@ -1,10 +1,16 @@
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
-});
+// Initialize OpenAI client only if API key is available
+const getOpenAIClient = () => {
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  if (!apiKey) {
+    return null;
+  }
+  return new OpenAI({
+    apiKey,
+    dangerouslyAllowBrowser: true
+  });
+};
 
 export interface AIEventPlan {
   venues: VenueRecommendation[];
@@ -92,6 +98,11 @@ export class EventAIAssistant {
       throw new Error('OpenAI API key not configured. Please add VITE_OPENAI_API_KEY to your environment variables.');
     }
 
+    const openai = getOpenAIClient();
+    if (!openai) {
+      throw new Error('OpenAI API key not configured. Please add VITE_OPENAI_API_KEY to your environment variables.');
+    }
+
     const prompt = this.buildEventPlanPrompt();
 
     try {
@@ -140,6 +151,11 @@ export class EventAIAssistant {
       return 'AI assistant is not available. Please configure your OpenAI API key.';
     }
 
+    const openai = getOpenAIClient();
+    if (!openai) {
+      return 'AI assistant is not available. Please configure your OpenAI API key.';
+    }
+
     const prompt = `
     You are an AI assistant helping with event planning for: ${this.eventDetails.title}
     
@@ -184,6 +200,11 @@ export class EventAIAssistant {
 
   async generateSuggestions(category: string, currentOptions?: any[]): Promise<string[]> {
     if (!import.meta.env.VITE_OPENAI_API_KEY) {
+      return ['AI suggestions unavailable - please configure OpenAI API key'];
+    }
+
+    const openai = getOpenAIClient();
+    if (!openai) {
       return ['AI suggestions unavailable - please configure OpenAI API key'];
     }
 
