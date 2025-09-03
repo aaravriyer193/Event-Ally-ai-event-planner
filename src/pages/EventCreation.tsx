@@ -340,7 +340,7 @@ export default function EventCreation() {
                 animation="glow"
               >
                 {generating ? 'Generating AI Plan...' : 'Generate AI Event Plan'}
-              </AnimatedButton>
+              </Button>
             </div>
           )}
         </AnimatedCard>
