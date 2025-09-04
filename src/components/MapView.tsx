@@ -1,30 +1,13 @@
 import React, { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { LatLngTuple } from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import anime from 'animejs';
-
-// Fix for default markers in react-leaflet
-import L from 'leaflet';
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
-let DefaultIcon = L.divIcon({
-  html: `<div class="bg-orange-500 w-6 h-6 rounded-full border-2 border-white shadow-lg"></div>`,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12],
-  popupAnchor: [0, -12],
-  className: 'custom-marker'
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
+import { MapPin, Star, DollarSign } from 'lucide-react';
 
 interface MapViewProps {
-  center: LatLngTuple;
+  center: [number, number];
   zoom?: number;
   markers?: Array<{
     id: string;
-    position: LatLngTuple;
+    position: [number, number];
     name: string;
     address: string;
     rating: number;
@@ -35,6 +18,7 @@ interface MapViewProps {
 
 export default function MapView({ center, zoom = 13, markers = [], className = '' }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     // Animate map container on mount
@@ -49,34 +33,57 @@ export default function MapView({ center, zoom = 13, markers = [], className = '
     }
   }, []);
 
+  // Create OpenStreetMap embed URL
+  const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${center[1] - 0.01},${center[0] - 0.01},${center[1] + 0.01},${center[0] + 0.01}&layer=mapnik&marker=${center[0]},${center[1]}`;
+
   return (
     <div ref={mapRef} className={`rounded-xl overflow-hidden border border-gray-700 ${className}`}>
-      <MapContainer
-        center={center}
-        zoom={zoom}
-        style={{ height: '400px', width: '100%' }}
-        className="z-10"
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      <div className="relative">
+        {/* Embedded OpenStreetMap */}
+        <iframe
+          ref={iframeRef}
+          src={mapUrl}
+          width="100%"
+          height="400"
+          style={{ border: 'none' }}
+          title="Event Location Map"
+          className="w-full h-96"
         />
         
-        {markers.map((marker) => (
-          <Marker key={marker.id} position={marker.position}>
-            <Popup className="custom-popup">
-              <div className="p-2">
-                <h3 className="font-semibold text-gray-900 mb-1">{marker.name}</h3>
-                <p className="text-gray-600 text-sm mb-2">{marker.address}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-yellow-600 text-sm">★ {marker.rating}</span>
-                  <span className="text-green-600 font-semibold">${marker.price.toLocaleString()}</span>
+        {/* Overlay with marker information */}
+        {markers.length > 0 && (
+          <div className="absolute top-4 left-4 right-4 max-h-32 overflow-y-auto">
+            <div className="space-y-2">
+              {markers.slice(0, 3).map((marker) => (
+                <div key={marker.id} className="bg-white/95 backdrop-blur-sm rounded-lg p-3 shadow-lg">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 text-sm">{marker.name}</h4>
+                      <p className="text-gray-600 text-xs mb-1">{marker.address}</p>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex items-center">
+                          <Star className="h-3 w-3 text-yellow-500 fill-current mr-1" />
+                          <span className="text-gray-700 text-xs">{marker.rating}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <DollarSign className="h-3 w-3 text-green-600 mr-1" />
+                          <span className="text-gray-700 text-xs">${marker.price.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <MapPin className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                  </div>
                 </div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
+              ))}
+              {markers.length > 3 && (
+                <div className="bg-gray-800/90 backdrop-blur-sm rounded-lg p-2 text-center">
+                  <span className="text-white text-xs">+{markers.length - 3} more locations</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
