@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { LatLngTuple } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import anime from 'animejs/lib/anime.es.js';
+import anime from 'animejs';
 
 // Fix for default markers in react-leaflet
 import L from 'leaflet';

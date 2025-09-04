@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import anime from 'animejs/lib/anime.es.js';
+import anime from 'animejs';
 import AnimatedCard from '../components/AnimatedCard';
 import AnimatedButton from '../components/AnimatedButton';
 import { 
