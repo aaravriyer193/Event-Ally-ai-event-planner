@@ -1,7 +1,6 @@
 import React from 'react';
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import * as anime from 'animejs';
 import AnimatedCard from '../components/AnimatedCard';
 import AnimatedButton from '../components/AnimatedButton';
 import { 
@@ -15,30 +14,21 @@ import {
 } from 'lucide-react';
 
 export default function LandingPage() {
-  const heroRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     // Hero section animations
     if (titleRef.current) {
-      anime({
-        targets: titleRef.current,
-        opacity: [0, 1],
-        translateY: [50, 0],
-        duration: 1000,
-        easing: 'easeOutCubic'
-      });
+      const element = titleRef.current;
+      element.style.opacity = '0';
+      element.style.transform = 'translateY(50px)';
+      element.style.transition = 'all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      
+      setTimeout(() => {
+        element.style.opacity = '1';
+        element.style.transform = 'translateY(0)';
+      }, 100);
     }
-
-    // Floating animation for sparkles
-    anime({
-      targets: '.floating-sparkle',
-      translateY: [-10, 10],
-      duration: 2000,
-      direction: 'alternate',
-      loop: true,
-      easing: 'easeInOutSine'
-    });
   }, []);
 
   return (
@@ -68,15 +58,15 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section ref={heroRef} className="relative overflow-hidden py-20 lg:py-32">
+      <section className="relative overflow-hidden py-20 lg:py-32">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-yellow-500/10"></div>
-        <div className="absolute top-20 left-20 floating-sparkle">
+        <div className="absolute top-20 left-20 animate-bounce">
           <Sparkles className="h-6 w-6 text-orange-400/30" />
         </div>
-        <div className="absolute top-40 right-32 floating-sparkle">
+        <div className="absolute top-40 right-32 animate-pulse">
           <Sparkles className="h-4 w-4 text-yellow-400/40" />
         </div>
-        <div className="absolute bottom-32 left-1/4 floating-sparkle">
+        <div className="absolute bottom-32 left-1/4 animate-bounce">
           <Sparkles className="h-5 w-5 text-orange-300/20" />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
