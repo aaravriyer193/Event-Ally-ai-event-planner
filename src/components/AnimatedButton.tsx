@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import * as anime from 'animejs';
+import anime from 'animejs';
 import { DivideIcon as LucideIcon } from 'lucide-react';
 
 interface AnimatedButtonProps {

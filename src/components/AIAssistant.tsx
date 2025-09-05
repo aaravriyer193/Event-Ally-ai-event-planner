@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { EventAIAssistant } from '../services/aiService';
 import { OpenStreetMapService } from '../services/mapService';
 import Button from './Button';
-import * as anime from 'animejs';
+import anime from 'animejs';
 import { 
   MessageCircle, 
   Send, 

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import * as anime from 'animejs';
+import anime from 'animejs';
 
 interface AnimatedCardProps {
   children: React.ReactNode;
