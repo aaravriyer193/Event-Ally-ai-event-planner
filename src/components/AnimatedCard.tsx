@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import * as anime from 'animejs';
 
 interface AnimatedCardProps {
   children: React.ReactNode;
@@ -23,91 +22,41 @@ export default function AnimatedCard({
 
     const element = cardRef.current;
 
-    // Initial animation based on type
-    const animations = {
-      fadeInUp: {
-        opacity: [0, 1],
-        translateY: [30, 0],
-        duration: 800,
-        easing: 'easeOutCubic'
-      },
-      fadeInLeft: {
-        opacity: [0, 1],
-        translateX: [-30, 0],
-        duration: 800,
-        easing: 'easeOutCubic'
-      },
-      fadeInRight: {
-        opacity: [0, 1],
-        translateX: [30, 0],
-        duration: 800,
-        easing: 'easeOutCubic'
-      },
-      scaleIn: {
-        opacity: [0, 1],
-        scale: [0.9, 1],
-        duration: 600,
-        easing: 'easeOutBack'
-      },
-      slideInUp: {
-        opacity: [0, 1],
-        translateY: [50, 0],
-        duration: 1000,
-        easing: 'easeOutExpo'
-      }
-    };
+    // CSS-based animations using classes
+    element.style.opacity = '0';
+    element.style.transform = getInitialTransform(animation);
+    element.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
 
-    // Set initial state
-    anime.set(element, {
-      opacity: 0,
-      ...(animation === 'fadeInUp' || animation === 'slideInUp' ? { translateY: animation === 'slideInUp' ? 50 : 30 } : {}),
-      ...(animation === 'fadeInLeft' ? { translateX: -30 } : {}),
-      ...(animation === 'fadeInRight' ? { translateX: 30 } : {}),
-      ...(animation === 'scaleIn' ? { scale: 0.9 } : {})
-    });
+    const timer = setTimeout(() => {
+      element.style.opacity = '1';
+      element.style.transform = 'translateX(0) translateY(0) scale(1)';
+    }, delay);
 
-    // Animate in
-    const timeline = anime.timeline();
-    timeline.add({
-      targets: element,
-      ...animations[animation],
-      delay
-    });
+    return () => clearTimeout(timer);
+  }, [delay, animation]);
 
-    // Hover animations
-    if (hover) {
-      const handleMouseEnter = () => {
-        anime({
-          targets: element,
-          scale: 1.02,
-          translateY: -2,
-          duration: 200,
-          easing: 'easeOutQuad'
-        });
-      };
-
-      const handleMouseLeave = () => {
-        anime({
-          targets: element,
-          scale: 1,
-          translateY: 0,
-          duration: 200,
-          easing: 'easeOutQuad'
-        });
-      };
-
-      element.addEventListener('mouseenter', handleMouseEnter);
-      element.addEventListener('mouseleave', handleMouseLeave);
-
-      return () => {
-        element.removeEventListener('mouseenter', handleMouseEnter);
-        element.removeEventListener('mouseleave', handleMouseLeave);
-      };
+  const getInitialTransform = (animationType: string) => {
+    switch (animationType) {
+      case 'fadeInUp':
+      case 'slideInUp':
+        return 'translateY(30px)';
+      case 'fadeInLeft':
+        return 'translateX(-30px)';
+      case 'fadeInRight':
+        return 'translateX(30px)';
+      case 'scaleIn':
+        return 'scale(0.9)';
+      default:
+        return 'translateY(30px)';
     }
-  }, [delay, animation, hover]);
+  };
+
+  const hoverClasses = hover 
+    ? 'hover:scale-105 hover:-translate-y-1 transition-transform duration-200' 
+    : '';
 
   return (
-    <div ref={cardRef} className={className}>
+    <div ref={cardRef} className={`${className} ${hoverClasses}`}>
       {children}
     </div>
   );

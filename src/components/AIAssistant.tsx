@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { EventAIAssistant } from '../services/aiService';
 import { OpenStreetMapService } from '../services/mapService';
 import Button from './Button';
-import * as anime from 'animejs';
 import { 
   MessageCircle, 
   Send, 
@@ -49,7 +48,6 @@ export default function AIAssistant({ eventId, eventDetails, isOpen, onToggle }:
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const aiAssistant = useRef(new EventAIAssistant(eventId, eventDetails));
-  const chatRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -58,18 +56,6 @@ export default function AIAssistant({ eventId, eventDetails, isOpen, onToggle }:
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  useEffect(() => {
-    if (isOpen && chatRef.current) {
-      anime({
-        targets: chatRef.current,
-        opacity: [0, 1],
-        scale: [0.9, 1],
-        duration: 300,
-        easing: 'easeOutCubic'
-      });
-    }
-  }, [isOpen]);
 
   const searchNearbyVendors = async (category: string) => {
     setLoadingSuggestions(true);
@@ -281,7 +267,7 @@ export default function AIAssistant({ eventId, eventDetails, isOpen, onToggle }:
   }
 
   return (
-    <div ref={chatRef} className={`fixed bottom-6 right-6 bg-gray-800/95 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-2xl z-50 transition-all duration-300 ${
+    <div className={`fixed bottom-6 right-6 bg-gray-800/95 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-2xl z-50 transition-all duration-300 ${
       isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]'
     }`}>
       {/* Header */}

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import * as anime from 'animejs';
 import { MapPin, Star, DollarSign } from 'lucide-react';
 
 interface MapViewProps {
@@ -18,18 +17,19 @@ interface MapViewProps {
 
 export default function MapView({ center, zoom = 13, markers = [], className = '' }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     // Animate map container on mount
     if (mapRef.current) {
-      anime({
-        targets: mapRef.current,
-        opacity: [0, 1],
-        scale: [0.95, 1],
-        duration: 800,
-        easing: 'easeOutCubic'
-      });
+      const element = mapRef.current;
+      element.style.opacity = '0';
+      element.style.transform = 'scale(0.95)';
+      element.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      
+      setTimeout(() => {
+        element.style.opacity = '1';
+        element.style.transform = 'scale(1)';
+      }, 100);
     }
   }, []);
 
@@ -41,7 +41,6 @@ export default function MapView({ center, zoom = 13, markers = [], className = '
       <div className="relative">
         {/* Embedded OpenStreetMap */}
         <iframe
-          ref={iframeRef}
           src={mapUrl}
           width="100%"
           height="400"
