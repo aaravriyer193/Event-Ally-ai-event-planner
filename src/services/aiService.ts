@@ -111,7 +111,7 @@ export class EventAIAssistant {
         messages: [
           {
             role: "system",
-            content: `You are an expert event planner with 20+ years of experience planning events of all types and budgets. You have deep knowledge of:
+            content: `You are an expert event planner with 20+ years of experience planning events of all types and budgets. You specialize in finding REAL, existing vendors with actual websites and contact information. You have deep knowledge of:
             - Venue selection and capacity planning
             - Catering options and dietary requirements
             - Entertainment booking and coordination
@@ -119,8 +119,10 @@ export class EventAIAssistant {
             - Budget optimization
             - Vendor coordination
             - Risk management and contingency planning
+            - Real vendor databases and industry contacts
+            - Comprehensive task management and detailed checklists
             
-            Always provide specific, actionable recommendations with realistic pricing based on current market rates. Include search terms that would help find actual vendors in the specified location.`
+            Always provide REAL vendor names with actual websites that exist. Create comprehensive, detailed checklists with 15-20 tasks minimum. Include specific, actionable recommendations with realistic pricing based on current market rates.`
           },
           {
             role: "user",
@@ -128,7 +130,7 @@ export class EventAIAssistant {
           }
         ],
         temperature: 0.7,
-        max_tokens: 4000
+        max_tokens: 6000
       });
 
       const content = response.choices[0]?.message?.content;
@@ -255,7 +257,7 @@ export class EventAIAssistant {
 
   private buildEventPlanPrompt(): string {
     return `
-    Create a comprehensive, realistic event plan for the following event:
+    Create a comprehensive, realistic event plan with REAL vendors and detailed task management for the following event:
     
     Event Type: ${this.eventDetails.type}
     Title: ${this.eventDetails.title}
@@ -265,47 +267,59 @@ export class EventAIAssistant {
     Guests: ${this.eventDetails.guests}
     Style: ${this.eventDetails.style}
     
+    IMPORTANT: Use REAL vendor names that actually exist in ${this.eventDetails.location}. Include actual website URLs that work. Create a comprehensive checklist with at least 15-20 detailed tasks.
+    
     Please provide a detailed JSON response with the following structure:
     
     {
       "venues": [
         {
-          "name": "Specific venue name",
+          "name": "REAL venue name that exists in the location",
           "type": "venue type",
           "capacity": number,
           "priceRange": "$X,XXX - $X,XXX",
           "features": ["feature1", "feature2"],
-          "description": "detailed description",
-          "searchTerms": ["term1", "term2"]
+          "description": "detailed description of the actual venue",
+          "website": "actual working website URL",
+          "phone": "real phone number format",
+          "address": "specific street address"
         }
       ],
       "catering": [
         {
-          "name": "Catering company name",
+          "name": "REAL catering company name in the area",
           "cuisine": "cuisine type",
           "serviceStyle": "buffet/plated/family style",
           "pricePerPerson": number,
           "menuItems": ["item1", "item2"],
-          "description": "service description",
-          "searchTerms": ["term1", "term2"]
+          "description": "detailed service description",
+          "website": "actual company website",
+          "phone": "real phone number",
+          "specialties": ["specialty1", "specialty2"]
         }
       ],
       "entertainment": [
         {
+          "name": "REAL entertainment company/performer name",
           "type": "entertainment type",
-          "description": "detailed description",
+          "description": "detailed description of services",
           "estimatedCost": number,
           "duration": "X hours",
-          "searchTerms": ["term1", "term2"]
+          "website": "actual website URL",
+          "phone": "contact number",
+          "services": ["service1", "service2"]
         }
       ],
       "decor": [
         {
+          "name": "REAL decor/rental company name",
           "theme": "theme name",
           "items": ["item1", "item2"],
           "estimatedCost": number,
           "colorScheme": ["color1", "color2"],
-          "description": "theme description"
+          "description": "theme description",
+          "website": "company website",
+          "phone": "contact information"
         }
       ],
       "timeline": [
@@ -323,7 +337,10 @@ export class EventAIAssistant {
           "deadline": "YYYY-MM-DD",
           "priority": "high/medium/low",
           "category": "category name",
-          "description": "task details"
+          "description": "detailed task instructions and requirements",
+          "estimatedTime": "time needed to complete",
+          "dependencies": ["other tasks this depends on"],
+          "notes": "additional important notes"
         }
       ],
       "budgetBreakdown": {
@@ -337,12 +354,22 @@ export class EventAIAssistant {
       "recommendations": "Overall planning advice and tips"
     }
     
+    CRITICAL REQUIREMENTS:
+    - Include at least 15-20 detailed checklist items covering all aspects of event planning
+    - Use REAL vendor names that actually exist in ${this.eventDetails.location}
+    - Provide actual working website URLs (research real businesses)
+    - Include specific addresses and phone numbers
+    - NO placeholder or fake information
+    - Create comprehensive task descriptions with time estimates
+    - Include task dependencies and detailed notes
+    
     Ensure all recommendations are:
     - Realistic for the specified budget and location
     - Appropriate for the event type and style
-    - Include specific search terms for finding actual vendors
+    - Based on real, existing businesses
     - Consider the guest count and venue capacity
     - Account for seasonal availability and pricing
+    - Include comprehensive task management with detailed instructions
     `;
   }
 

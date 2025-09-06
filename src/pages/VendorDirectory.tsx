@@ -326,30 +326,23 @@ export default function VendorDirectory() {
             >
               {/* Image */}
               <div className="relative">
-                <img 
-                  src={vendor.image} 
-                  alt={vendor.name}
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+                <div className="w-full h-48 bg-gradient-to-br from-orange-500/20 to-yellow-500/20 flex items-center justify-center group-hover:from-orange-500/30 group-hover:to-yellow-500/30 transition-all duration-300">
+                  <div className="text-center">
+                    <h3 className="text-2xl font-bold text-white mb-2">{vendor.name}</h3>
+                    <p className="text-orange-400 font-medium">{vendor.category}</p>
+                  </div>
+                </div>
                 <button
                   onClick={() => toggleFavorite(vendor.id)}
                   className="absolute top-4 right-4 p-2 bg-black/50 backdrop-blur-sm rounded-full hover:bg-black/70 transition-all duration-200"
                 >
                   <Heart className={`h-4 w-4 ${favorites.includes(vendor.id) ? 'text-red-400 fill-current' : 'text-white'}`} />
                 </button>
-                <div className="absolute bottom-4 left-4">
-                  <span className="px-2 py-1 bg-black/70 backdrop-blur-sm text-white text-xs rounded-full">
-                    {vendor.category}
-                  </span>
-                </div>
               </div>
 
               {/* Content */}
               <div className="p-6">
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-white group-hover:text-orange-400 transition-colors">
-                    {vendor.name}
-                  </h3>
                   <div className="flex items-center space-x-1">
                     <Star className="h-4 w-4 text-yellow-400 fill-current" />
                     <span className="text-gray-300 text-sm">{vendor.rating}</span>
@@ -395,12 +388,14 @@ export default function VendorDirectory() {
                   <button className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
                     <Phone className="h-4 w-4" />
                   </button>
-                  <button className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                    <Mail className="h-4 w-4" />
-                  </button>
-                  <button className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                  <a 
+                    href={vendor.contact?.website} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-2 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 rounded-lg transition-colors"
+                  >
                     <Globe className="h-4 w-4" />
-                  </button>
+                  </a>
                 </div>
               </div>
             </AnimatedCard>

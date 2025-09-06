@@ -38,13 +38,15 @@ export interface Vendor {
   category: string;
   price: number;
   rating: number;
-  image: string;
   description: string;
   contact: {
     phone: string;
     email: string;
     website: string;
+    address?: string;
   };
+  specialties?: string[];
+  services?: string[];
 }
 
 export interface TimelineItem {
@@ -60,6 +62,12 @@ export interface ChecklistItem {
   deadline: string;
   completed: boolean;
   assignee?: string;
+  description?: string;
+  estimatedTime?: string;
+  dependencies?: string[];
+  notes?: string;
+  priority?: 'high' | 'medium' | 'low';
+  category?: string;
 }
 
 interface EventContextType {
@@ -232,12 +240,12 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
       category: 'venue',
       price: Math.round(event.budget * 0.3),
       rating: place.rating,
-      image: place.photos[0],
       description: `Professional event venue - ${place.address}`,
       contact: {
         phone: place.phone || '(555) 123-4567',
         email: generateEmail(place.name),
-        website: place.website || generateWebsite(place.name)
+        website: place.website || generateWebsite(place.name),
+        address: place.address
       }
     }));
 
@@ -247,7 +255,6 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
       category: 'catering',
       price: Math.round((event.budget * 0.4) / event.guests),
       rating: place.rating,
-      image: place.photos[0],
       description: 'Full-service catering with professional staff',
       contact: {
         phone: place.phone || '(555) 234-5678',
@@ -268,9 +275,36 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
         { id: '4', time: '20:30', activity: 'Closing and cleanup', duration: 60 }
       ],
       checklist: [
-        { id: '1', task: 'Confirm venue booking', deadline: calculateDeadline(event.date, 0), completed: false },
-        { id: '2', task: 'Finalize guest list', deadline: calculateDeadline(event.date, 1), completed: false },
-        { id: '3', task: 'Send invitations', deadline: calculateDeadline(event.date, 2), completed: false }
+        { 
+          id: '1', 
+          task: 'Confirm venue booking and contract details', 
+          deadline: calculateDeadline(event.date, 0), 
+          completed: false,
+          description: 'Review and sign venue contract, confirm date, time, and all included services',
+          estimatedTime: '2-3 hours',
+          priority: 'high',
+          category: 'Venue'
+        },
+        { 
+          id: '2', 
+          task: 'Finalize guest list and collect RSVPs', 
+          deadline: calculateDeadline(event.date, 1), 
+          completed: false,
+          description: 'Create final guest list, send invitations, and track responses',
+          estimatedTime: '3-4 hours',
+          priority: 'high',
+          category: 'Guest Management'
+        },
+        { 
+          id: '3', 
+          task: 'Book catering services and finalize menu', 
+          deadline: calculateDeadline(event.date, 2), 
+          completed: false,
+          description: 'Select caterer, finalize menu options, confirm dietary restrictions',
+          estimatedTime: '2-3 hours',
+          priority: 'high',
+          category: 'Catering'
+        }
       ],
       recommendations: 'Basic event plan created. Consider adding more vendors and customizing your timeline.',
       budgetBreakdown: {
