@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvents } from '../contexts/EventContext';
 import Layout from '../components/Layout';
+import Button from '../components/Button';
 import AnimatedButton from '../components/AnimatedButton';
 import AnimatedCard from '../components/AnimatedCard';
 import { 
@@ -12,7 +13,8 @@ import {
   DollarSign, 
   Users,
   Sparkles,
-  Loader
+  Loader,
+  AlertCircle
 } from 'lucide-react';
 
 const eventTypes = [
@@ -38,6 +40,7 @@ const styles = [
 export default function EventCreation() {
   const [currentStep, setCurrentStep] = useState(1);
   const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     type: '',
@@ -67,6 +70,7 @@ export default function EventCreation() {
 
   const handleSubmit = async () => {
     setGenerating(true);
+    setError(null);
     
     try {
       const event = await createEvent(formData);
@@ -75,6 +79,7 @@ export default function EventCreation() {
       navigate(`/event/${eventWithPlan.id}`);
     } catch (error) {
       console.error('Error creating event:', error);
+      setError(error instanceof Error ? error.message : 'Failed to create event plan. Please try again.');
     } finally {
       setGenerating(false);
     }
@@ -341,6 +346,21 @@ export default function EventCreation() {
               >
                 {generating ? 'Generating AI Plan...' : 'Generate AI Event Plan'}
               </Button>
+
+              {error && (
+                <div className="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg flex items-start space-x-3">
+                  <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-red-400 font-medium">Error Creating Event Plan</p>
+                    <p className="text-red-300 text-sm mt-1">{error}</p>
+                    {error.includes('OpenAI API key') && (
+                      <p className="text-red-300 text-sm mt-2">
+                        Please configure your OpenAI API key in the environment variables to use AI features.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </AnimatedCard>
