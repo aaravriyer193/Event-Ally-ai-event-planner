@@ -4,6 +4,7 @@ import { useEvents } from '../contexts/EventContext';
 import Layout from '../components/Layout';
 import Button from '../components/Button';
 import AIAssistant from '../components/AIAssistant';
+import AIEventPlanner from '../components/AIEventPlanner';
 import { 
   ArrowLeft,
   Calendar,
@@ -29,6 +30,7 @@ export default function EventPlan() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [showAIPlanner, setShowAIPlanner] = useState(false);
   
   const event = events.find(e => e.id === id);
 
@@ -369,44 +371,43 @@ export default function EventPlan() {
                         {item.task}
                       </p>
                       <p className="text-gray-400 text-sm">Due: {formatDate(item.deadline)}</p>
-                        {item.priority && (
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            item.priority === 'high' ? 'bg-red-500/20 text-red-400' :
-                            item.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                            'bg-green-500/20 text-green-400'
-                          }`}>
-                            {item.priority}
-                          </span>
-                        )}
-                      </div>
-                      {item.description && (
-                        <p className="text-gray-400 text-sm mb-2">{item.description}</p>
-                      )}
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        {item.estimatedTime && (
-                          <span>Est. time: {item.estimatedTime}</span>
-                        )}
-                      </div>
-                      {item.dependencies && item.dependencies.length > 0 && (
-                        <p className="text-gray-500 text-xs mt-1">
-                          Depends on: {item.dependencies.join(', ')}
-                        </p>
-                      )}
-                      {item.notes && (
-                        <p className="text-gray-400 text-xs mt-1 italic">Note: {item.notes}</p>
-                      )}
-                    </div>
-                    <div className="flex flex-col items-end space-y-1">
-                      {item.category && (
-                        <span className="px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded-full">
-                          {item.category}
-                        </span>
-                      )}
-                      {item.assignee && (
-                      <span className="px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded-full">
-                        {item.assignee}
-                      </span>
-                      )}
+                       {item.priority && (
+                         <span className={`px-2 py-1 text-xs rounded-full ${
+                           item.priority === 'high' ? 'bg-red-500/20 text-red-400' :
+                           item.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                           'bg-green-500/20 text-green-400'
+                         }`}>
+                           {item.priority}
+                         </span>
+                       )}
+                       {item.description && (
+                         <p className="text-gray-400 text-sm mb-2">{item.description}</p>
+                       )}
+                       <div className="flex items-center justify-between text-xs text-gray-500">
+                         {item.estimatedTime && (
+                           <span>Est. time: {item.estimatedTime}</span>
+                         )}
+                       </div>
+                       {item.dependencies && item.dependencies.length > 0 && (
+                         <p className="text-gray-500 text-xs mt-1">
+                           Depends on: {item.dependencies.join(', ')}
+                         </p>
+                       )}
+                       {item.notes && (
+                         <p className="text-gray-400 text-xs mt-1 italic">Note: {item.notes}</p>
+                       )}
+                     </div>
+                     <div className="flex flex-col items-end space-y-1">
+                       {item.category && (
+                         <span className="px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded-full">
+                           {item.category}
+                         </span>
+                       )}
+                       {item.assignee && (
+                         <span className="px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded-full">
+                           {item.assignee}
+                         </span>
+                       )}
                     </div>
                   </div>
                 )) || (
@@ -472,6 +473,12 @@ export default function EventPlan() {
           onToggle={() => setShowAIAssistant(!showAIAssistant)}
         />
       )}
+
+      {/* AI Event Planner Chat */}
+      <AIEventPlanner
+        isOpen={showAIPlanner}
+        onClose={() => setShowAIPlanner(false)}
+      />
     </Layout>
   );
 }

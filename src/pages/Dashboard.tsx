@@ -5,6 +5,7 @@ import { useEvents } from '../contexts/EventContext';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import AnimatedButton from '../components/AnimatedButton';
+import AIEventPlanner from '../components/AIEventPlanner';
 import AnimatedCard from '../components/AnimatedCard';
 import AIAssistant from '../components/AIAssistant';
 import APISetupGuide from '../components/APISetupGuide';
@@ -23,6 +24,7 @@ import {
 export default function Dashboard() {
   const { events } = useEvents();
   const { user } = useAuth();
+  const [showAIPlanner, setShowAIPlanner] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [showAPIGuide, setShowAPIGuide] = useState(false);
