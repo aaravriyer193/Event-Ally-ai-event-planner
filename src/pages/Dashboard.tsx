@@ -232,6 +232,12 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* AI Event Planner Chat */}
+      <AIEventPlanner
+        isOpen={showAIPlanner}
+        onClose={() => setShowAIPlanner(false)}
+      />
+
       {/* AI Assistant */}
       {selectedEvent && (
         <AIAssistant
