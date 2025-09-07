@@ -9,6 +9,7 @@ import AIEventPlanner from '../components/AIEventPlanner';
 import AnimatedCard from '../components/AnimatedCard';
 import AIAssistant from '../components/AIAssistant';
 import APISetupGuide from '../components/APISetupGuide';
+import APIKeySetup from '../components/APIKeySetup';
 import { 
   Plus, 
   Calendar, 
@@ -23,13 +24,23 @@ import {
 
 export default function Dashboard() {
   const { events } = useEvents();
-  const { user } = useAuth();
+  const { user, updateApiKey, hasApiKey } = useAuth();
   const [showAIPlanner, setShowAIPlanner] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [showAPIGuide, setShowAPIGuide] = useState(false);
+  const [showAPIKeySetup, setShowAPIKeySetup] = useState(false);
 
-  const hasOpenAI = !!import.meta.env.VITE_OPENAI_API_KEY;
+
+  // Show API key setup popup for logged-in users without API key
+  React.useEffect(() => {
+    if (user && !hasApiKey() && !showAPIKeySetup) {
+      const timer = setTimeout(() => {
+        setShowAPIKeySetup(true);
+      }, 2000); // Show after 2 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [user, hasApiKey, showAPIKeySetup]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -64,7 +75,7 @@ export default function Dashboard() {
           </p>
           
           {/* API Setup Notice */}
-          {!hasOpenAI && (
+          {!hasApiKey() && (
             <div className="mt-4 bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -74,8 +85,8 @@ export default function Dashboard() {
                     <p className="text-gray-300 text-sm">Configure OpenAI API key to unlock AI features</p>
                   </div>
                 </div>
-                <AnimatedButton variant="secondary" size="sm" onClick={() => setShowAPIGuide(true)} animation="pulse">
-                  Setup API
+                <AnimatedButton variant="secondary" size="sm" onClick={() => setShowAPIKeySetup(true)} animation="pulse">
+                  Add API Key
                 </AnimatedButton>
               </div>
             </div>
@@ -252,6 +263,14 @@ export default function Dashboard() {
       <APISetupGuide 
         isOpen={showAPIGuide}
         onClose={() => setShowAPIGuide(false)}
+      />
+
+      {/* API Key Setup */}
+      <APIKeySetup
+        isOpen={showAPIKeySetup}
+        onClose={() => setShowAPIKeySetup(false)}
+        onSave={updateApiKey}
+        currentApiKey={user?.apiKey}
       />
     </Layout>
   );

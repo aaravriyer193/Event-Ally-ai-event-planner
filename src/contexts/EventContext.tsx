@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { EventAIAssistant, AIEventPlan } from '../services/aiService';
 import { OpenStreetMapService } from '../services/mapService';
+import { useAuth } from './AuthContext';
 
 export interface Event {
   id: string;
@@ -114,9 +115,12 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   };
 
   const generateAIPlan = async (event: Event): Promise<Event> => {
+    // Get user's API key from auth context
+    const userApiKey = JSON.parse(localStorage.getItem('eventAllyUser') || '{}')?.apiKey;
+    
     try {
       // Initialize AI assistant for this event
-      const aiAssistant = new EventAIAssistant(event.id, event);
+      const aiAssistant = new EventAIAssistant(event.id, event, userApiKey);
       
       // Generate comprehensive AI plan
       const aiPlanData: AIEventPlan = await aiAssistant.generateEventPlan();

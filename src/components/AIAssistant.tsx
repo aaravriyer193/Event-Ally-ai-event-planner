@@ -47,7 +47,12 @@ export default function AIAssistant({ eventId, eventDetails, isOpen, onToggle }:
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const aiAssistant = useRef(new EventAIAssistant(eventId, eventDetails));
+
+  // Initialize AI assistant with user's API key
+  React.useEffect(() => {
+    const userApiKey = JSON.parse(localStorage.getItem('eventAllyUser') || '{}')?.apiKey;
+    aiAssistant.current = new EventAIAssistant(eventId, eventDetails, userApiKey);
+  }, [eventId, eventDetails]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

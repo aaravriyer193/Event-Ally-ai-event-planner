@@ -87,18 +87,21 @@ export interface BudgetBreakdown {
 export class EventAIAssistant {
   private eventId: string;
   private eventDetails: any;
+  private userApiKey?: string;
 
-  constructor(eventId: string, eventDetails: any) {
+  constructor(eventId: string, eventDetails: any, userApiKey?: string) {
     this.eventId = eventId;
     this.eventDetails = eventDetails;
+    this.userApiKey = userApiKey;
   }
 
   async generateEventPlan(): Promise<AIEventPlan> {
-    if (!import.meta.env.VITE_OPENAI_API_KEY) {
+    const apiKey = this.userApiKey || import.meta.env.VITE_OPENAI_API_KEY;
+    if (!apiKey) {
       throw new Error('OpenAI API key not configured. Please add VITE_OPENAI_API_KEY to your environment variables.');
     }
 
-    const openai = getOpenAIClient();
+    const openai = getOpenAIClient(this.userApiKey);
     if (!openai) {
       throw new Error('OpenAI API key not configured. Please add VITE_OPENAI_API_KEY to your environment variables.');
     }
@@ -149,11 +152,12 @@ export class EventAIAssistant {
   }
 
   async askQuestion(question: string, context?: string): Promise<string> {
-    if (!import.meta.env.VITE_OPENAI_API_KEY) {
+    const apiKey = this.userApiKey || import.meta.env.VITE_OPENAI_API_KEY;
+    if (!apiKey) {
       return 'AI assistant is not available. Please configure your OpenAI API key.';
     }
 
-    const openai = getOpenAIClient();
+    const openai = getOpenAIClient(this.userApiKey);
     if (!openai) {
       return 'AI assistant is not available. Please configure your OpenAI API key.';
     }
@@ -201,11 +205,12 @@ export class EventAIAssistant {
   }
 
   async generateSuggestions(category: string, currentOptions?: any[]): Promise<string[]> {
-    if (!import.meta.env.VITE_OPENAI_API_KEY) {
+    const apiKey = this.userApiKey || import.meta.env.VITE_OPENAI_API_KEY;
+    if (!apiKey) {
       return ['AI suggestions unavailable - please configure OpenAI API key'];
     }
 
-    const openai = getOpenAIClient();
+    const openai = getOpenAIClient(this.userApiKey);
     if (!openai) {
       return ['AI suggestions unavailable - please configure OpenAI API key'];
     }

@@ -4,6 +4,7 @@ interface User {
   id: string;
   email: string;
   name: string;
+  apiKey?: string;
   preferences?: {
     eventType?: string;
     budget?: string;
@@ -17,6 +18,8 @@ interface AuthContextType {
   signup: (email: string, password: string, name: string) => Promise<boolean>;
   logout: () => void;
   updatePreferences: (preferences: User['preferences']) => void;
+  updateApiKey: (apiKey: string) => void;
+  hasApiKey: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -76,8 +79,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateApiKey = (apiKey: string) => {
+    if (user) {
+      const updatedUser = { ...user, apiKey };
+      setUser(updatedUser);
+      localStorage.setItem('eventAllyUser', JSON.stringify(updatedUser));
+    }
+  };
+
+  const hasApiKey = (): boolean => {
+    return !!(user?.apiKey && user.apiKey.trim().length > 0);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, updatePreferences }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, updatePreferences, updateApiKey, hasApiKey }}>
       {children}
     </AuthContext.Provider>
   );
