@@ -157,11 +157,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Stock photos from [Pexels](https://pexels.com)
 - Built with [Vite](https://vitejs.dev) and [React](https://reactjs.org)
 
-## 📧 Contact
-
-For questions or support, please reach out:
-- Email: support@eventally.com
-- Website: [Event Ally](https://event-ally.netlify.app)
+## Website: [Event Ally](https://event-ally.netlify.app)
 
 ---
 
