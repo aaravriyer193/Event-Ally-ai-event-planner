@@ -20,7 +20,7 @@ A modern, intelligent event planning web application that uses AI to create comp
 
 ## 🚀 Live Demo
 
-Visit the live application: [https://event-ally-ai-event-yq09.bolt.host](https://event-ally-ai-event-yq09.bolt.host)
+Visit the live application: [Event-Ally](https://event-ally.netlify.app)
 
 ## 🛠️ Tech Stack
 
