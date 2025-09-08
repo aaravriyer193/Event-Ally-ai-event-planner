@@ -161,7 +161,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions or support, please reach out:
 - Email: support@eventally.com
-- Website: [Event Ally](https://event-ally-ai-event-yq09.bolt.host)
+- Website: [Event Ally](https://event-ally.netlify.app)
 
 ---
 
